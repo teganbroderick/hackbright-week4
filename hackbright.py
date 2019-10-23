@@ -62,37 +62,52 @@ def get_project_by_title(par_1):
         SELECT description, max_grade
         FROM projects
         WHERE title = :title
-        """
+    """
 
     db_cursor = db.session.execute(QUERY, {'title': par_1})
 
     row = db_cursor.fetchone()
-    # print(row)
+    print(row)
     print(f"Project: {par_1} \nDescription: {row[0]} \nMax Grade: {row[1]}")
 
 
 
 def get_grade_by_github_title(github, title):
     """Print grade student received for a project."""
-    #Isn't finished!
+    
     QUERY = """
-        SELECT grade
+        SELECT grade, student_github, project_title
         FROM grades
         WHERE project_title = :title AND student_github = :github
-        """
+    """
 
     db_cursor = db.session.execute(QUERY, {'title': title, 'github': github})
 
     row = db_cursor.fetchone()
 
-    # print(row)
-    print(f"Grade: {grade} \nDescription: {row[0]} \nMax Grade: {row[1]}")
+    print(row)
+    print(f"Grade: {row[0]} \nStudent Github: {row[1]} \nProject Title: {row[2]}")
 
 
 
 def assign_grade(github, title, grade):
     """Assign a student a grade on an assignment and print a confirmation."""
-    pass
+    
+    sql = """
+        INSERT INTO grades (student_github, project_title, grade)
+        VALUES (:student_github, :project_title, :grade)
+    """
+
+    db.session.execute(
+        sql, {
+            'student_github': github,
+            'project_title': title,
+            'grade': grade
+        }
+    )
+
+    db.session.commit()
+    print(f'NEW: Student: {github}; Project: {title}; Grade: {grade}')
 
 
 def handle_input():
@@ -126,7 +141,7 @@ def handle_input():
 if __name__ == "__main__":
     connect_to_db(app)
 
-    handle_input()
+    #handle_input()
 
     # To be tidy, we close our database connection -- though,
     # since this is where our program ends, we'd quit anyway.
